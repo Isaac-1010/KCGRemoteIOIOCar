@@ -1,27 +1,25 @@
 package com.robotside;
 
-import net.majorkernelpanic.streaming.Session;
-import net.majorkernelpanic.streaming.SessionBuilder;
-import net.majorkernelpanic.streaming.audio.AudioQuality;
+import net.majorkernelpanic.streaming.gl.SurfaceView;
 import net.majorkernelpanic.streaming.rtsp.RtspServer;
-import net.majorkernelpanic.streaming.video.VideoQuality;
-import ioio.lib.util.android.IOIOActivity;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.WindowManager;
 
 
 public class MainActivity extends Activity {
 	private final static String TAG = "MainActivity";
-	private net.majorkernelpanic.streaming.gl.SurfaceView mSurfaceView;
-	MainThread mainThread;
+	private net.majorkernelpanic.streaming.gl.SurfaceView mSurfaceView;	
+//	private SensorManager mSensorManager = null;
+	private StremingThread videoStrem;
+	private TelemetryThread sensorsThread;
+	private ControlThread ioioThread;
+	private String ip_address;
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,19 +33,27 @@ public class MainActivity extends Activity {
 				.edit();
 		editor.putString(RtspServer.KEY_PORT, String.valueOf(1234));
 		editor.commit();
-		 
-		mainThread= new MainThread(this);
-		mainThread.run();
+		
+		init(this);
 	}
-
-	private void enableUi(final boolean enable) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				// mPanSeekBar.setEnabled(enable);
-				// mTiltSeekBar.setEnabled(enable);
-			}
-		});
+	
+	private void init(Context context){
+		mSurfaceView = (SurfaceView) findViewById(R.id.surface);
+		videoStrem = new StremingThread(context, mSurfaceView);
+		sensorsThread = new TelemetryThread(context);
+		ioioThread = new ControlThread();
 	}
-
+	
+	public void onResume(){
+		super.onResume();
+//		ioioThread.start();
+		videoStrem.start();
+	}
+	
+	public void onPause(){
+		super.onPause();
+		videoStrem.stopStream();
+		sensorsThread.stop_thread();
+//		ioioThread.abort();
+	}
 }

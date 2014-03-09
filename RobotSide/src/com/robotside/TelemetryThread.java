@@ -20,7 +20,7 @@ public class TelemetryThread extends Thread implements SensorEventListener{
     SensorManager mSensorManager;
     Sensor accSensor;
     Sensor magnetSensor;
-    Activity _app;
+
     float gravity[];
     float geoMagnetic[];
     float azimut;
@@ -28,10 +28,11 @@ public class TelemetryThread extends Thread implements SensorEventListener{
     float roll;
 
    
-	public TelemetryThread(Activity app)
+	public TelemetryThread(Context context)
     {
-    	_app=app;
-        mSensorManager = (SensorManager) _app.getSystemService(Context.SENSOR_SERVICE);
+    
+
+		mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         accSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
