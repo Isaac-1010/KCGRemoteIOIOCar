@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
 	
 	public void onPause(){
 		super.onPause();
-		videoStrem.stopStream();
+		//videoStrem.stopStream();
 		sensorsThread.stop_thread();
 //		ioioThread.abort();
 	}
