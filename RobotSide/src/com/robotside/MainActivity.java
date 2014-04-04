@@ -33,7 +33,6 @@ public class MainActivity extends Activity {
 		
 		layout.addView(surfaceView, params);
 		
-		init(this);
 		setContentView(layout);
 	}
 	
@@ -45,7 +44,6 @@ public class MainActivity extends Activity {
 		super.onResume();
 		controlThread= new ControlThread();
 		streamingThread = new StreamingThread();
-		
 		connectionThread= new ConnectionThread(surfaceView, controlThread, streamingThread);
 		connectionThread.start();
 	}
