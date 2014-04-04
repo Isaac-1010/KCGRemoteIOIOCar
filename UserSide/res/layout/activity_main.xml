@@ -5,35 +5,12 @@
     android:orientation="vertical"
     android:gravity="center" >
 
-    <SurfaceView
-        android:id="@+id/playersurface"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent" />
-
-    <local.UI.Controllers.VerticalSeekBar
-        android:id="@+id/panSeekBar"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:max="1000"
-        android:progress="500"
-         />
-
-    <local.UI.Controllers.VerticalSeekBar
-        android:id="@+id/tiltSeekBar"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:max="1000"
-        android:progress="500" />
-
-    <ToggleButton
-        android:id="@+id/toggleButton1"
+    <Button
+        android:id="@+id/connectButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="21dp"
-        android:layout_marginTop="53dp"
-        android:layout_toRightOf="@+id/tiltSeekBar"
-        android:text="ToggleButton" />
-
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="@string/connect_button" />
+    
 </RelativeLayout>

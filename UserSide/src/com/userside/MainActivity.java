@@ -1,86 +1,82 @@
 package com.userside;
 
-import java.io.IOException;
-
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnPreparedListener;
-import android.os.Bundle;
 import android.app.Activity;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.widget.SeekBar;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
-public class MainActivity extends Activity implements SurfaceHolder.Callback,
-		OnPreparedListener {
-
-	MediaPlayer mediaPlayer;
-	SurfaceHolder surfaceHolder;
-	SurfaceView playerSurfaceView;
-	String videoSrc = "rtsp://192.168.3.109:1234";
-
-	private final int PAN_PIN = 3;
-	private final int TILT_PIN = 6;
-
-	private final int PWM_FREQ = 100;
-
-	private SeekBar mPanSeekBar;
-	private SeekBar mTiltSeekBar;
-
+public class MainActivity extends Activity{
+	private Context context;
+	private MenuInflater menuPopOut;
+	private ConnectionThread connctionThread;
+	private Button connectButton;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		init(this);
+	}
+	
+	private void init(Context context){
+		connctionThread = new ConnectionThread();
+		connectButton = (Button) findViewById(R.id.connectButton);
+		
+		connectButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				connctionThread.connect();
+			}
+		});
+	}
 
-		mPanSeekBar = (SeekBar) findViewById(R.id.panSeekBar);
-		mTiltSeekBar = (SeekBar) findViewById(R.id.tiltSeekBar);
-		playerSurfaceView = (SurfaceView) findViewById(R.id.playersurface);
-
-		surfaceHolder = playerSurfaceView.getHolder();
-		surfaceHolder.addCallback(this);
-
+	private void updatePreferences(){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+		StaticValues.SERVER_IP = preferences.getString("ip", "10.0.2.2");
+		StaticValues.PORT = Integer.parseInt(preferences.getString("port", "4444"));
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		menuPopOut = getMenuInflater();
+		menuPopOut.inflate(R.menu.main, menu);
+		return true;
 	}
 
 	@Override
-	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void surfaceCreated(SurfaceHolder arg0) {
-
-		try {
-			mediaPlayer = new MediaPlayer();
-			mediaPlayer.setDisplay(surfaceHolder);
-			mediaPlayer.setDataSource(videoSrc);
-			mediaPlayer.prepare();
-			mediaPlayer.setOnPreparedListener(this);
-			mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.preferences){
+			Intent intent;
+			if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
+				intent = new Intent("android.intent.action.PREFENCES");
+			else
+				intent = new Intent("android.intent.action.NEW_VERSION_PREFENCES");
+			startActivity(intent);
 		}
+		return true;
 	}
-
-	@Override
-	public void surfaceDestroyed(SurfaceHolder arg0) {
-		// TODO Auto-generated method stub
-
+	
+	public void onPause(){
+		super.onPause();
+		connctionThread.onPause();
 	}
-
-	@Override
-	public void onPrepared(MediaPlayer mp) {
-		mediaPlayer.start();
+	
+	public void onResume(){
+		updatePreferences();
+		super.onResume();
+		connctionThread = new ConnectionThread();
+		connctionThread.start();
 	}
-
 }
