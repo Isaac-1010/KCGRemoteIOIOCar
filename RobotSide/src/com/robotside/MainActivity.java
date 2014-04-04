@@ -1,59 +1,57 @@
 package com.robotside;
 
-import net.majorkernelpanic.streaming.gl.SurfaceView;
-import net.majorkernelpanic.streaming.rtsp.RtspServer;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 
 
 public class MainActivity extends Activity {
 	private final static String TAG = "MainActivity";
-	private net.majorkernelpanic.streaming.gl.SurfaceView mSurfaceView;	
-//	private SensorManager mSensorManager = null;
-	private StremingThread videoStrem;
-	private TelemetryThread sensorsThread;
-	private ControlThread ioioThread;
-	private String ip_address;
-	
+	private RelativeLayout layout;
+	private ControlThread controlThread;
+	private StreamingThread streamingThread;
+	private ConnectionThread connectionThread ;
+	private MySurfaceView surfaceView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		setContentView(R.layout.activity_main);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-		// Sets the port of the RTSP server to 1234
-		Editor editor = PreferenceManager.getDefaultSharedPreferences(this)
-				.edit();
-		editor.putString(RtspServer.KEY_PORT, String.valueOf(1234));
-		editor.commit();
+		
+		layout = new RelativeLayout(this);
 		
 		init(this);
+		
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+		params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+		params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+		params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+		
+		layout.addView(surfaceView, params);
+		
+		init(this);
+		setContentView(layout);
 	}
 	
 	private void init(Context context){
-		mSurfaceView = (SurfaceView) findViewById(R.id.surface);
-		videoStrem = new StremingThread(context, mSurfaceView);
-		sensorsThread = new TelemetryThread(context);
-		ioioThread = new ControlThread();
+		surfaceView = new MySurfaceView(context);
 	}
 	
 	public void onResume(){
 		super.onResume();
-//		ioioThread.start();
-		videoStrem.start();
+		controlThread= new ControlThread();
+		streamingThread = new StreamingThread();
+		
+		connectionThread= new ConnectionThread(surfaceView, controlThread, streamingThread);
+		connectionThread.start();
 	}
 	
 	public void onPause(){
 		super.onPause();
-		//videoStrem.stopStream();
-		sensorsThread.stop_thread();
-//		ioioThread.abort();
+		surfaceView.onPause();
 	}
 }

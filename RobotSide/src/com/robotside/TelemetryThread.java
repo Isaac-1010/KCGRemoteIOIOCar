@@ -43,6 +43,7 @@ public class TelemetryThread extends Thread implements SensorEventListener{
 
     public void stop_thread()
     {
+    	
     	socket.close();
         mSensorManager.unregisterListener((SensorEventListener) this, accSensor);
         mSensorManager.unregisterListener((SensorEventListener)this, magnetSensor);
